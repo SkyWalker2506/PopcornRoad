@@ -23,14 +23,13 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         else
             Instance = this;
-
+        currentLevelIndex = PlayerPrefs.GetInt("CurrentLevel", 1);
         PrepareLevel(currentLevelIndex);
     }
 
     private void OnEnable()
     {
         StartTrigger.PlayerPassed += SetLevel;
-      
     }
 
     private void OnDisable()
@@ -47,7 +46,7 @@ public class GameManager : MonoBehaviour
 
     void PrepareLevel(int levelIndex)
     {
-        currentLevelIndex = PlayerPrefs.GetInt("CurrentLevel", 1);
+      //  
         var level = GetLevel(levelIndex);
         if (!level)
             level = LevelCreator.Instance.CreateLevel(levelIndex).GetComponent<Level>();
@@ -56,6 +55,7 @@ public class GameManager : MonoBehaviour
         player.DoMove = false;
         UIManager.Instance.UpdateLevelText(levelIndex);
         ActivateNeededLevels();
+        GetLevel(levelIndex - 1).gameObject.SetActive(false);
 
     }
 
@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
            levels = FindObjectsOfType<Level>().OrderBy(l => l.LevelIndex).ToList();
     }
 
+
     void SetLevel(Level level)
     {
         UpdateCurrentLevel(level.LevelIndex);
@@ -78,6 +79,12 @@ public class GameManager : MonoBehaviour
         ActivateNeededLevels();
         PositionLevels();
         UIManager.Instance.UpdateLevelText(currentLevelIndex);
+    }
+
+    [ContextMenu("Reset Current Level")]
+    public void ResetCurrentLevel()
+    {
+        UpdateCurrentLevel(1);
     }
 
     void UpdateCurrentLevel(int levelIndex)
