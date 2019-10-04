@@ -1,29 +1,39 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelCreator : MonoBehaviour
 {
+    // Unity has a problem of using headers. Header of a header cause problem so it is needed to switch the order of the headers to get proper result.
+    [Header("Road Settings")]
+    [Space(5)]
     [Header("General Settings")]
     [Range(50, 500)]
     public int RoadLength = 100;
     [Range(10, 25)]
     public int RoadWidth = 10;
     [Range(5, 200)]
+    [Header("Obstacle Settings")]
     public int FirstObstacleStartPosition = 10;
-    [Range(1,10)]
-    public int LevelDificulty = 1;
     [Range(.01f, .1f)]
     public float ObstacleChanceConstant = .05f;
+    public List<ObstacleGrid> ObstaclePatterns;
+    [Header("Collectable Settings")]
     [Range(.1f, .9f)]
     public float PopcornChance = .25f;
+    [Header("Prefabs")]
     public GameObject RoadBlock;
     public GameObject SideBlock;
     public GameObject StartTrigger;
     public GameObject PopCorn;
     public GameObject Ice;
-    public List<ObstacleGrid> ObstaclePatterns;
-    [Header("Multiple Level Settings")]
+
+
+    [Header("Level Creation Settings")]
+    [Range(1, 100)]
+    public int Level = 1;
+
+    [Header("Multiple Level Creation Settings")]
     [Range(1, 100)]
     public int FirstLevel = 1;
     [Range(1, 100)]
@@ -150,7 +160,7 @@ public class LevelCreator : MonoBehaviour
     [ContextMenu("Create Level")]
     public void CreateLevel()
     {
-        CreateLevel(LevelDificulty);
+        CreateLevel(Level);
     }
 
     public Transform CreateLevel(int Level)
