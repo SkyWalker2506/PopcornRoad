@@ -150,21 +150,7 @@ public class LevelCreator : MonoBehaviour
     [ContextMenu("Create Level")]
     public void CreateLevel()
     {
-        var levelObj = new GameObject
-        {
-            name = "Level "
-        };
-
-        var road = CreateRoad();
-        road.name = RoadWidth + "x" + RoadLength + " LD " + LevelDificulty;
-        CreateLevelObjects(road,LevelDificulty);
-        road.parent = levelObj.transform;
-        var level = levelObj.AddComponent<Level>();
-        level.LevelIndex = 1;
-        var startTrigger = road.GetComponentInChildren<StartTrigger>();
-        level.StartPosition = startTrigger.transform;
-        level.RoadLength = RoadLength;
-        startTrigger.BelongedLevel = level;
+        CreateLevel(LevelDificulty);
     }
 
     public Transform CreateLevel(int Level)
