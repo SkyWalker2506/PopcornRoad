@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 2227129547316539390}
   - component: {fileID: 977013670211451582}
   - component: {fileID: 7874326686665081839}
-  - component: {fileID: 5473423797631465776}
   - component: {fileID: 8109669771389112106}
+  - component: {fileID: 5473423797631465776}
+  - component: {fileID: 5432409790551511319}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -29,8 +30,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2183700609725860897}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -23.01, y: 1.43, z: -32.98}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -23.01, y: 1, z: -32.98}
+  m_LocalScale: {x: 1, y: 0.62, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -94,22 +95,6 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5473423797631465776
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2183700609725860897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d17b4549b2e14921b5ace9974212965, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DoMove: 1
-  ForwardSpeed: 10
-  SideSpeed: 10
-  maxDeltaX: 50
 --- !u!54 &8109669771389112106
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -126,3 +111,35 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 116
   m_CollisionDetection: 1
+--- !u!114 &5473423797631465776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2183700609725860897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17b4549b2e14921b5ace9974212965, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  regenerationSpeed: 5
+  coldestColor: {r: 0.046991818, g: 0.77433455, b: 0.9056604, a: 1}
+  hotestColor: {r: 1, g: 0, b: 0.16173172, a: 1}
+--- !u!114 &5432409790551511319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2183700609725860897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 391a43415c4b64845ae3173249e2e164, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DoMove: 0
+  ForwardSpeed: 10
+  SideSpeed: 10
+  maxDeltaX: 50

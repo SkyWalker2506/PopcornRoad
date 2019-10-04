@@ -1,0 +1,211 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LevelCreator : MonoBehaviour
+{
+    // Unity has a problem of using headers. Header of a header cause problem so it is needed to switch the order of the headers to get proper result.
+    [Header("Road Settings")]
+    [Space(5)]
+    [Header("General Settings")]
+    [Range(50, 500)]
+    public int RoadLength = 100;
+    [Range(10, 25)]
+    public int RoadWidth = 10;
+    [Range(5, 200)]
+    [Header("Obstacle Settings")]
+    public int FirstObstacleStartPosition = 10;
+    [Range(.001f, .1f)]
+    public float ObstacleChanceConstant = .05f;
+    public List<ObstacleGrid> ObstaclePatterns;
+    [Header("Collectable Settings")]
+    [Range(.01f, .9f)]
+    public float PopcornChance = .25f;
+    [Header("Prefabs")]
+    public GameObject RoadBlock;
+    public GameObject SideBlock;
+    public GameObject StartTrigger;
+    public GameObject PopCorn;
+    public GameObject Ice;
+
+
+    [Header("Level Creation Settings")]
+    [Range(1, 100)]
+    public int Level = 1;
+
+    [Header("Multiple Level Creation Settings")]
+    [Range(1, 100)]
+    public int FirstLevel = 1;
+    [Range(1, 100)]
+    public int TotalLevels = 10;
+
+    public static LevelCreator Instance;
+
+    void Awake()
+    {
+        if (Instance)
+            Destroy(gameObject);
+        else
+            Instance = this;
+    }
+
+    [ContextMenu("Create Road")]
+    public Transform CreateRoad()
+    {
+        var road = new GameObject("Road").transform;
+        var roadBlock = Instantiate(RoadBlock, road);
+        var sideBlockLeft = Instantiate(SideBlock, road);
+        var sideBlockRight = Instantiate(SideBlock, road);
+        var startTrigger = Instantiate(StartTrigger, road);
+        roadBlock.transform.localScale = new Vector3(RoadWidth, 1, RoadLength);
+        sideBlockLeft.transform.localScale = new Vector3(1, 1, RoadLength);
+        sideBlockRight.transform.localScale = new Vector3(1, 1, RoadLength);
+        startTrigger.transform.localScale = new Vector3(RoadWidth, 1, 1);
+        sideBlockLeft.transform.position = new Vector3((RoadWidth+ SideBlock.transform.lossyScale.x)*-.5f, 0.5f, 0);
+        sideBlockLeft.transform.rotation = Quaternion.Euler(0, 180, 0);
+        sideBlockRight.transform.position = new Vector3((RoadWidth+ SideBlock.transform.lossyScale.x)*.5f, 0.5f, 0);
+        startTrigger.transform.position = new Vector3(0, 1, RoadLength * -.5f);
+        var startSideBlockleft = Instantiate(SideBlock, startTrigger.transform);
+        var startSideBlockRight = Instantiate(SideBlock, startTrigger.transform);
+        #if UNITY_EDITOR
+        DestroyImmediate(startSideBlockleft.GetComponent<Collider>());
+        DestroyImmediate(startSideBlockRight.GetComponent<Collider>());
+        #else
+        Destroy(startSideBlockleft.GetComponent<Collider>());
+        Destroy(startSideBlockRight.GetComponent<Collider>());
+        #endif
+        startSideBlockleft.transform.localScale = new Vector3(1/ startTrigger.transform.localScale.x, 10, 5);
+        startSideBlockRight.transform.localScale = new Vector3(1 / startTrigger.transform.localScale.x, 10, 5);
+        startSideBlockleft.transform.localPosition = new Vector3((RoadWidth + SideBlock.transform.lossyScale.x) * -.5f / startTrigger.transform.localScale.x, 5, 0);
+        startSideBlockleft.transform.localRotation = Quaternion.Euler(0, 180, 0);
+        startSideBlockRight.transform.localPosition = new Vector3((RoadWidth + SideBlock.transform.lossyScale.x) * .5f / startTrigger.transform.localScale.x, 5f, 0);
+        return road;
+    }
+
+    ObstacleGrid CreateProperObstaclePattern(ObstacleGrid obstacle)
+    {
+        var obs = obstacle;
+        if (RoadWidth > obs.Grid.Count)
+        {
+            var emptyColumn = new Column(obs.Grid[0].column.Count);
+            var emptyColumnCount = RoadWidth - obs.Grid.Count;
+            for (int i = 0; i < emptyColumnCount * .5f; i++)
+            {
+                obs.Grid.Insert(0, emptyColumn);
+            }
+
+            while (RoadWidth > obs.Grid.Count)
+            {
+                obs.Grid.Insert(obs.Grid.Count, emptyColumn);
+            }
+        }
+
+        else if (RoadWidth < obs.Grid.Count)
+        {
+            for (int i = 0; i < (obs.Grid.Count - RoadWidth) * .5f; i++)
+            {
+                obstacle.Grid.RemoveAt(0);
+            }
+
+            while (RoadWidth < obs.Grid.Count)
+            {
+                obs.Grid.RemoveAt(obs.Grid.Count - 1);
+            }
+        }
+        return obs;
+    }
+
+    ObstacleGrid MapAllRoad(int difficulty)
+    {
+        var Map = new ObstacleGrid(RoadWidth, FirstObstacleStartPosition);
+        var obstacle = GetRandomObstacle();
+        Map.AddSameSizeRowGrid(CreateProperObstaclePattern(obstacle).Grid);
+        var currentColumn = FirstObstacleStartPosition + obstacle.Grid[0].column.Count + 1;
+        while (currentColumn < RoadLength - 5)
+        {
+            var ObstacleChance = difficulty * ObstacleChanceConstant;
+            var putObstacle = Random.Range(0, 1f) < ObstacleChance;
+            if (putObstacle)
+            {
+                obstacle = GetRandomObstacle();
+                Map.AddSameSizeRowGrid(CreateProperObstaclePattern(obstacle).Grid);
+                currentColumn +=  obstacle.Grid[0].column.Count;
+            }
+                Map.AddEmptyRow();
+                currentColumn++;
+        }
+
+        while(Map.Grid[0].column.Count<RoadLength)
+        {
+            Map.AddEmptyRow();
+        }
+
+        return Map;
+    } 
+
+    public void CreateLevelObjects(Transform road, int difficulty)
+    {
+        var roadStartCorner = new Vector3(1+RoadWidth * -.5f, 0, 1+RoadLength * -.5f);
+        var map = MapAllRoad(difficulty);
+        for (int j = 5; j < RoadLength-2 ; j++)
+        {
+            for (int i = 0; i < RoadWidth-1; i++)
+            {
+                GameObject gameObj = null;
+                if (map.Grid[i].column[j] > 0)
+                {
+                    gameObj = Instantiate(Ice, road);
+                }
+                else if(Random.Range(0, 1f) < PopcornChance)
+                {
+                    gameObj = Instantiate(PopCorn, road);
+                }
+                if(gameObj!=null)
+                gameObj.transform.localPosition = roadStartCorner + new Vector3(i, 1, j);
+            }
+        }
+    }
+
+    ObstacleGrid GetRandomObstacle()
+    {
+        return Instantiate(ObstaclePatterns[Random.Range(0, ObstaclePatterns.Count)]);
+    }
+
+    [ContextMenu("Create Level")]
+    public void CreateLevel()
+    {
+        CreateLevel(Level);
+    }
+
+    public Transform CreateLevel(int Level)
+    {
+        var difficulty = Mathf.Min(Level, 10);
+        var levelObj = new GameObject
+        {
+            name = "Level " + Level
+        };
+  
+        var road = CreateRoad();
+        road.name= RoadWidth + "x" + RoadLength + " LD " + difficulty;
+        CreateLevelObjects(road, difficulty);
+        road.parent = levelObj.transform;
+        var level = levelObj.AddComponent<Level>();
+        level.LevelIndex = Level;
+        var startTrigger = road.GetComponentInChildren<StartTrigger>();
+        level.StartPosition = startTrigger.transform;
+        level.RoadLength = RoadLength;
+        startTrigger.BelongedLevel = level;
+        return levelObj.transform;
+    }
+
+    [ContextMenu("Create Multiple Level")]
+    public void CreateLevels()
+    {
+        for (int i = 0; i < TotalLevels; i++)
+        {
+          var level = CreateLevel(i + FirstLevel);
+          level.position += level.forward* RoadLength * i;
+        }
+    } 
+
+}
