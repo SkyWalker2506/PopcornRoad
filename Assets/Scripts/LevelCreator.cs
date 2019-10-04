@@ -65,6 +65,20 @@ public class LevelCreator : MonoBehaviour
         sideBlockLeft.transform.rotation = Quaternion.Euler(0, 180, 0);
         sideBlockRight.transform.position = new Vector3((RoadWidth+ SideBlock.transform.lossyScale.x)*.5f, 0.5f, 0);
         startTrigger.transform.position = new Vector3(0, 1, RoadLength * -.5f);
+        var startSideBlockleft = Instantiate(SideBlock, startTrigger.transform);
+        var startSideBlockRight = Instantiate(SideBlock, startTrigger.transform);
+        #if UNITY_EDITOR
+        DestroyImmediate(startSideBlockleft.GetComponent<Collider>());
+        DestroyImmediate(startSideBlockRight.GetComponent<Collider>());
+        #else
+        Destroy(startSideBlockleft.GetComponent<Collider>());
+        Destroy(startSideBlockRight.GetComponent<Collider>());
+        #endif
+        startSideBlockleft.transform.localScale = new Vector3(1/ startTrigger.transform.localScale.x, 10, 1);
+        startSideBlockRight.transform.localScale = new Vector3(1 / startTrigger.transform.localScale.x, 10, 1);
+        startSideBlockleft.transform.localPosition = new Vector3((RoadWidth + SideBlock.transform.lossyScale.x) * -.5f / startTrigger.transform.localScale.x, 5, 0);
+        startSideBlockleft.transform.localRotation = Quaternion.Euler(0, 180, 0);
+        startSideBlockRight.transform.localPosition = new Vector3((RoadWidth + SideBlock.transform.lossyScale.x) * .5f / startTrigger.transform.localScale.x, 5f, 0);
         return road;
     }
 
